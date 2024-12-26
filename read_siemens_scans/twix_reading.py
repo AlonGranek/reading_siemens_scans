@@ -28,7 +28,10 @@ def read_raw_twix_data(twix_path: str, fix_oversampling: bool = False):
     kspace.flags['remove_os'] = fix_oversampling
     dim_keys = list(kspace._dim_order)
     active_image_dims = Dimensions(
-        (DIM_DESCRIPTION[dim_keys[dim]], kspace.shape[dim]) for dim in range(kspace.ndim) if kspace.shape[dim] > 1
+        (
+            DIM_DESCRIPTION[dim_keys[dim]] if dim_keys[dim] in DIM_DESCRIPTION.keys() else f'Unnamed ({dim_keys[dim]})',
+            kspace.shape[dim]
+        ) for dim in range(kspace.ndim) if kspace.shape[dim] > 1
     )
     kspace_squeezed = kspace[:].squeeze()
     return kspace_squeezed, active_image_dims
@@ -39,16 +42,4 @@ def read_raw_twix_data(twix_path: str, fix_oversampling: bool = False):
 
 
 
-
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt
-    from matplotlib import use
-    from read_siemens_scans.recon import adjoint_recon, adjoint_recon_fix_aspect_ratio
-    use('TkAgg')
-
-    file = '/mnt/c/Users/along/Downloads/meas_MID00210_FID12025_pulseq.dat'
-    kspace_data, dim_data = read_raw_twix_data(file, fix_oversampling=False)
-    images = adjoint_recon(kspace_data, dim_data)
-    images_interp, _ = adjoint_recon_fix_aspect_ratio(kspace_data, dim_data)
-    breakpoint()
 
